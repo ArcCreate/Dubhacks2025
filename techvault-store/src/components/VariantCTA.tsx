@@ -19,7 +19,7 @@ export default function VariantCTA({ product, onAddToCart, location }: VariantCT
   useEffect(() => {
     const loadExperiment = async () => {
       try {
-        const experiment = await getExperiment('cta_button_test');
+        const experiment = await getExperiment('prime_banner_cta_test');
         setVariant(experiment.variant);
       } catch (error) {
         console.error('Error loading experiment:', error);

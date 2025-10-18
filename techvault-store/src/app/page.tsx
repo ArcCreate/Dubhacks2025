@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Product, CartItem } from '@/lib/analytics';
-import { logPageView } from '@/lib/analytics';
-import { initializeStatsig } from '@/lib/statsigClient';
+import { logPageView, logActionClick } from '@/lib/analytics';
+import { initializeStatsig, getExperiment } from '@/lib/statsigClient';
 import Header from '@/components/Header';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
@@ -15,12 +15,17 @@ export default function HomePage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [ctaText, setCtaText] = useState('Shop Now');
+  const [ctaColor, setCtaColor] = useState('bg-orange-500 hover:bg-orange-600');
 
   // Initialize Statsig and log page view
   useEffect(() => {
     const initialize = async () => {
       try {
         await initializeStatsig();
+        const experiment = await getExperiment('prime_banner_cta_test');
+        setCtaText(experiment.variant === 'X' ? 'Shop Now' : 'Get Prime Access');
+        setCtaColor(experiment.variant === 'X' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-purple-500 hover:bg-purple-600');
         await logPageView('home');
         setIsInitialized(true);
       } catch (error) {
@@ -109,8 +114,11 @@ export default function HomePage() {
             <div className="text-center">
               <h1 className="text-4xl font-bold mb-2">TechVault Prime</h1>
               <p className="text-xl">Top 100+ Tech Innovations</p>
-              <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded mt-4">
-                Shop Now
+              <button 
+                className={`${ctaColor} text-white font-bold py-2 px-6 rounded mt-4`} 
+                onClick={() => logActionClick('cta_click', 'home_banner')}
+              >
+                {ctaText}
               </button>
             </div>
           </div>
