@@ -1,0 +1,96 @@
+{
+  "experimentKey": "one_click_checkout",
+  "name": "One-Click Checkout Button",
+  "description": "Testing button styles for one-click checkout feature",
+  "hypothesis": "An emphasized green 'Buy Now - 1 Click' button will increase checkout engagement by 20% compared to standard blue 'Checkout' button",
+  "variants": {
+    "control": {
+      "name": "Standard Checkout",
+      "description": "Standard blue checkout button",
+      "passPercentage": 50,
+      "parameters": {
+        "buttonColor": "blue",
+        "buttonText": "Checkout",
+        "buttonStyle": "standard",
+        "enableOneClick": false
+      }
+    },
+    "treatment": {
+      "name": "One-Click Checkout",
+      "description": "Emphasized green one-click button",
+      "passPercentage": 50,
+      "parameters": {
+        "buttonColor": "green",
+        "buttonText": "Buy Now - 1 Click",
+        "buttonStyle": "emphasized",
+        "enableOneClick": true
+      }
+    }
+  },
+  "codeChanges": {
+    "files": [
+      "src/components/ProductCard.tsx",
+      "src/components/CheckoutButton.tsx"
+    ],
+    "description": "Modify checkout button styling and text based on experiment variant"
+  },
+  "branchConfig": {
+    "baseBranch": "main",
+    "experimentBranch": "feature/one-click-checkout"
+  },
+  "statsig": {
+    "idType": "userID",
+    "targetingGateID": "",
+    "allocation": 100
+  },
+  "primaryMetrics": [
+    {
+      "name": "one_click_button_click",
+      "type": "event_count",
+      "direction": "increase",
+      "hypothesizedValue": 0.20
+    }
+  ],
+  "secondaryMetrics": [
+    {
+      "name": "checkout_completion_time",
+      "type": "count",
+      "direction": "decrease"
+    },
+    {
+      "name": "product_click",
+      "type": "event_count",
+      "direction": "increase"
+    },
+    {
+      "name": "add_to_cart",
+      "type": "event_count",
+      "direction": "increase"
+    }
+  ],
+  "targetingRules": [
+    {
+      "name": "All Users",
+      "conditions": [
+        {
+          "type": "public",
+          "operator": "==",
+          "targetValue": true
+        }
+      ],
+      "passPercentage": 100
+    }
+  ],
+  "allocation": 100,
+  "deployment": {
+    "strategy": "feature_flag",
+    "rolloutPercentage": 50,
+    "rollbackPlan": "Disable feature flag if engagement drops >10%"
+  },
+  "metadata": {
+    "tags": ["checkout", "button", "engagement"],
+    "owner": "UX Team",
+    "priority": "high",
+    "expectedDuration": "1 week"
+  }
+}

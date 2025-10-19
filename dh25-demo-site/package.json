@@ -16,13 +16,15 @@
     "experiment:stop": "tsx scripts/experiment-cli.ts stop",
     "experiment:list": "tsx scripts/experiment-cli.ts list",
     "experiment:preflight": "tsx scripts/experiment-cli.ts preflight",
+    "experiment:create-new": "tsx scripts/createNewExperiment.ts",
+    "experiment:update-metrics": "tsx scripts/updateExperimentMetrics.ts",
+    "experiment:start-new": "tsx scripts/startExperiment.ts",
+    "experiment:check": "tsx scripts/checkExperiment.ts",
+    "experiment:list-all": "tsx scripts/listExperiments.ts",
     "env:validate": "tsx scripts/lib/env-validator.ts",
     "env:check": "npm run env:validate"
   },
   "dependencies": {
-    "@statsig/js-client": "^3.27.0",
-    "@statsig/session-replay": "^3.27.0",
-    "@statsig/web-analytics": "^3.27.0",
     "dotenv": "^17.2.3",
     "next": "14.2.5",
     "react": "^18",

@@ -1,0 +1,89 @@
+{
+  "experimentKey": "button_color_test_v2",
+  "name": "Button Color A/B Test",
+  "description": "Testing button color impact on conversion rates",
+  "hypothesis": "Red buttons will increase click-through rates by 10% compared to blue buttons",
+  "variants": {
+    "control": {
+      "name": "Blue Button",
+      "description": "Standard blue button color",
+      "passPercentage": 50,
+      "parameters": {
+        "buttonColor": "blue",
+        "buttonText": "Add to Cart",
+        "buttonSize": "medium"
+      }
+    },
+    "treatment": {
+      "name": "Red Button", 
+      "description": "Red button to test urgency",
+      "passPercentage": 50,
+      "parameters": {
+        "buttonColor": "red",
+        "buttonText": "Add to Cart",
+        "buttonSize": "medium"
+      }
+    }
+  },
+  "codeChanges": {
+    "files": [
+      "src/components/ProductCard.tsx",
+      "src/components/VariantCTA.tsx"
+    ],
+    "description": "Modify button color based on experiment variant"
+  },
+  "branchConfig": {
+    "baseBranch": "main",
+    "experimentBranch": "feature/button-color-test"
+  },
+  "statsig": {
+    "idType": "userID",
+    "targetingGateID": "",
+    "allocation": 100
+  },
+  "primaryMetrics": [
+    {
+      "name": "add_to_cart",
+      "type": "event_count",
+      "direction": "increase",
+      "hypothesizedValue": 0.10
+    }
+  ],
+  "secondaryMetrics": [
+    {
+      "name": "product_click",
+      "type": "event_count", 
+      "direction": "increase"
+    },
+    {
+      "name": "purchase",
+      "type": "event_count",
+      "direction": "increase"
+    }
+  ],
+  "targetingRules": [
+    {
+      "name": "All Users",
+      "conditions": [
+        {
+          "type": "public",
+          "operator": "==",
+          "targetValue": true
+        }
+      ],
+      "passPercentage": 100
+    }
+  ],
+  "allocation": 100,
+  "deployment": {
+    "strategy": "feature_flag",
+    "rolloutPercentage": 50,
+    "rollbackPlan": "Disable feature flag if conversion drops >5%"
+  },
+  "metadata": {
+    "tags": ["button", "color", "conversion"],
+    "owner": "UX Team",
+    "priority": "medium",
+    "expectedDuration": "1 week"
+  }
+}

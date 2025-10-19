@@ -1,0 +1,72 @@
+{
+  "experimentKey": "button_color_test",
+  "name": "Button Color Test",
+  "description": "Testing the impact of button color on conversion rates",
+  "hypothesis": "Red buttons increase conversion rates by 10%",
+  "variants": {
+    "control": {
+      "name": "Control",
+      "description": "Blue button (current)",
+      "parameters": {
+        "buttonColor": "blue",
+        "buttonText": "Add to Cart"
+      },
+      "passPercentage": 50
+    },
+    "treatment": {
+      "name": "Treatment", 
+      "description": "Red button (test)",
+      "parameters": {
+        "buttonColor": "red",
+        "buttonText": "Add to Cart"
+      },
+      "passPercentage": 50
+    }
+  },
+  "codeChanges": [
+    {
+      "file": "src/components/ProductCard.tsx",
+      "function": "ProductCard",
+      "wrapWith": "getExperiment",
+      "parameterUsage": "buttonColor"
+    }
+  ],
+  "targetingRules": [
+    {
+      "name": "Branch-based targeting",
+      "conditions": [
+        {
+          "type": "branch",
+          "operator": "equals",
+          "targetValue": "exp/button_color_test"
+        }
+      ],
+      "passPercentage": 100,
+      "environments": ["development"]
+    }
+  ],
+  "allocation": 100,
+  "primaryMetrics": [],
+  "secondaryMetrics": [],
+  "branchConfig": {
+    "branchName": "exp/button_color_test",
+    "targetBranch": "main",
+    "createFromBranch": "main"
+  },
+  "deployment": {
+    "platform": "vercel",
+    "waitForDeployment": false,
+    "deploymentTimeout": 300000
+  },
+  "statsig": {
+    "idType": "user_id",
+    "environment": "development",
+    "autoStart": false
+  },
+  "metadata": {
+    "author": "experiment-automation",
+    "tags": ["automated", "branch-based", "ui", "conversion"],
+    "estimatedDuration": "1 week",
+    "successCriteria": "10% increase in conversion rate"
+  }
+}

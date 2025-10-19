@@ -1,0 +1,91 @@
+{
+  "experimentKey": "checkout_flow_test",
+  "name": "Checkout Flow Optimization",
+  "description": "Testing different checkout flow designs to improve conversion rates",
+  "hypothesis": "A simplified checkout flow with fewer steps will increase conversion rates by 15%",
+  "variants": {
+    "control": {
+      "name": "Standard Checkout",
+      "description": "Current multi-step checkout process",
+      "passPercentage": 50,
+      "parameters": {
+        "checkoutSteps": 4,
+        "showProgressBar": true,
+        "requireAccount": true,
+        "showTrustBadges": false
+      }
+    },
+    "treatment": {
+      "name": "Streamlined Checkout",
+      "description": "Simplified single-page checkout",
+      "passPercentage": 50,
+      "parameters": {
+        "checkoutSteps": 1,
+        "showProgressBar": false,
+        "requireAccount": false,
+        "showTrustBadges": true
+      }
+    }
+  },
+  "codeChanges": {
+    "files": [
+      "src/components/CheckoutFlow.tsx",
+      "src/components/CheckoutStep.tsx"
+    ],
+    "description": "Modify checkout flow to use single-step vs multi-step process"
+  },
+  "branchConfig": {
+    "baseBranch": "main",
+    "experimentBranch": "feature/checkout-optimization"
+  },
+  "statsig": {
+    "idType": "userID",
+    "targetingGateID": "",
+    "allocation": 100
+  },
+  "primaryMetrics": [
+    {
+      "name": "checkout_completion_rate",
+      "type": "ratio",
+      "direction": "increase",
+      "hypothesizedValue": 0.15
+    }
+  ],
+  "secondaryMetrics": [
+    {
+      "name": "checkout_abandonment_rate",
+      "type": "ratio",
+      "direction": "decrease"
+    },
+    {
+      "name": "time_to_checkout",
+      "type": "count",
+      "direction": "decrease"
+    }
+  ],
+  "targetingRules": [
+    {
+      "name": "All Users",
+      "conditions": [
+        {
+          "type": "public",
+          "operator": "==",
+          "targetValue": true
+        }
+      ],
+      "passPercentage": 100
+    }
+  ],
+  "allocation": 100,
+  "deployment": {
+    "strategy": "feature_flag",
+    "rolloutPercentage": 50,
+    "rollbackPlan": "Disable feature flag if conversion drops >5%"
+  },
+  "metadata": {
+    "tags": ["checkout", "conversion", "ux"],
+    "owner": "Product Team",
+    "priority": "high",
+    "expectedDuration": "2 weeks"
+  }
+}

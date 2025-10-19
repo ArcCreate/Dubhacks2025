@@ -6,6 +6,11 @@
  * Note: This is a stub implementation ready for Statsig integration
  */
 
+import dotenv from 'dotenv';
+
+// Load environment variables from .env.local
+dotenv.config({ path: '.env.local' });
+
 // Types
 interface Product {
   id: string;
@@ -197,6 +202,21 @@ async function simulateUserJourney(user: User, maxActions: number): Promise<void
   if (cart.length > 0 && Math.random() < 0.25) {
     await simulateCheckoutStart(user, cart);
     actions++;
+
+    // Simulate one-click button click (higher rate for treatment variant)
+    const clickRate = variant === 'Y' ? 0.8 : 0.6; // Treatment gets 20% higher engagement
+    if (Math.random() < clickRate) {
+      await logEvent(user, {
+        name: 'one_click_button_click',
+        value: 1,
+        metadata: {
+          variant: variant,
+          cart_size: cart.length,
+          experiment: 'one_click_checkout',
+          button_style: variant === 'Y' ? 'emphasized' : 'standard'
+        }
+      });
+    }
 
     // 5-12% chance to complete purchase
     if (Math.random() < 0.08) {

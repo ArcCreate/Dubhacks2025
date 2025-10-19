@@ -9,22 +9,10 @@ import { readFileSync, existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { execSync } from 'child_process';
 import { validateContract, createDefaultContract, type ExperimentContract } from './lib/contract-schema.js';
-import { FastCodeGenerator } from './lib/fast-code-generator.js';
+import { CodeGenerator } from './lib/code-generator.js';
 import { StatsigAPI } from './lib/statsig-api.js';
 import { getVercelClient } from './lib/vercel-client.js';
 import { getGitHubClient } from './lib/github-client.js';
-
-// Load environment variables from .env.local
-try {
-  const dotenv = require('dotenv');
-  const envPath = join(process.cwd(), '.env.local');
-  if (existsSync(envPath)) {
-    dotenv.config({ path: envPath });
-    console.log(`🔧 Loaded environment variables from .env.local`);
-  }
-} catch (error) {
-  console.warn('⚠️  dotenv not available, using system environment variables');
-}
 
 /**
  * Main experiment runner
@@ -32,12 +20,12 @@ try {
 class ExperimentRunner {
   private projectRoot: string;
   private statsigAPI: StatsigAPI;
-  private codeGenerator: FastCodeGenerator;
+  private codeGenerator: CodeGenerator;
 
   constructor() {
     this.projectRoot = resolve(process.cwd());
     this.statsigAPI = new StatsigAPI();
-    this.codeGenerator = new FastCodeGenerator(this.projectRoot);
+    this.codeGenerator = new CodeGenerator(this.projectRoot);
   }
 
   /**
