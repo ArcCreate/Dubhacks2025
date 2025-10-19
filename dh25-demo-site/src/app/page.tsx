@@ -186,18 +186,18 @@ export default function HomePage() {
               <div className="space-y-4">
                 <div className="text-center">
                   <img
-                    src="/api/placeholder/200/150"
-                    alt="Organic Apples"
+                    src="/images/organic-bananas.jpg"
+                    alt="Organic Bananas"
                     className="w-full h-32 object-cover rounded mb-2"
                   />
-                  <p className="text-sm font-medium">Organic Gala Apples</p>
+                  <p className="text-sm font-medium">Organic Bananas</p>
                   <p className="text-lg font-bold text-red-600">$2.99</p>
                   <span className="bg-green-600 text-white text-xs px-2 py-1 rounded">prime</span>
                 </div>
                 <div className="border-t pt-4">
                   <div className="flex items-center space-x-2 mb-2">
                     <img
-                      src="/api/placeholder/60/60"
+                      src="/images/fresh-bread.jpg"
                       alt="Fresh Bread"
                       className="w-12 h-12 object-cover rounded"
                     />
