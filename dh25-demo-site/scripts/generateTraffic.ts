@@ -7,6 +7,7 @@
  */
 
 import dotenv from 'dotenv';
+import * as Statsig from 'statsig-node';
 
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' });
@@ -40,6 +41,26 @@ const DEFAULT_USERS = 100;
 const DEFAULT_ACTIONS = 5;
 const BASE_URL = process.env.TRAFFIC_BASE_URL || 'http://localhost:3000';
 
+// Statsig SDK (initialized once)
+let statsigInitialized = false;
+
+/**
+ * Initialize Statsig SDK
+ */
+async function initializeStatsig(): Promise<void> {
+  if (statsigInitialized) return;
+  
+  const serverSecret = process.env.STATSIG_SERVER_SECRET;
+  if (!serverSecret) {
+    console.warn('STATSIG_SERVER_SECRET not found - running in mock mode');
+    return; // Do not initialize Statsig if secret is missing
+  }
+  
+  await Statsig.initialize(serverSecret);
+  statsigInitialized = true;
+  console.log('Statsig server secret found - ready for integration');
+}
+
 // Product data (matches the client)
 const PRODUCTS: Product[] = [
   { id: '1', name: 'Organic Bananas', price: 1.99, image: '/api/placeholder/300/200', description: 'Fresh organic bananas, perfect for snacking or baking. Sold by the bunch.', category: 'Fresh Produce', unit: 'per bunch', freshness: 'Fresh' },
@@ -71,37 +92,79 @@ function generateUser(): User {
 }
 
 /**
- * Get experiment variant for user (stub implementation)
- * In real implementation, this would call Statsig.getExperiment()
+ * Get experiment variant for user
  */
 async function getExperimentVariant(user: User): Promise<'X' | 'Y'> {
-  // Mock experiment logic - in real implementation this would call Statsig
-  const hash = user.id.split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0);
-    return a & a;
-  }, 0);
-  const variant = Math.abs(hash) % 2 === 0 ? 'X' : 'Y';
+  await initializeStatsig();
   
-  console.log(`User ${user.id} assigned to variant ${variant}`);
-  return variant;
+  const userContext = {
+    userID: user.id,
+    custom: {
+      country: user.country,
+      device: user.device
+    }
+  };
+  
+  if (!statsigInitialized) {
+    // Fallback to mock logic if Statsig not initialized
+    const hash = user.id.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    const variant = Math.abs(hash) % 2 === 0 ? 'X' : 'Y';
+    console.log(`User ${user.id} assigned to variant ${variant} (mock mode)`);
+    return variant;
+  }
+  
+  // Call Statsig to check gate (logs exposure automatically)
+  const isInTreatment = Statsig.checkGate(userContext, 'one_click_checkout_v2');
+  const variant = isInTreatment ? 'Y' : 'X'; // Treatment gets Y, Control gets X
+  
+  console.log(`User ${user.id} assigned to variant ${variant} by Statsig`);
+  return variant as 'X' | 'Y';
 }
 
 /**
- * Log event (stub implementation)
- * In real implementation, this would call Statsig.logEvent()
+ * Log event to Statsig
  */
 async function logEvent(user: User, event: AnalyticsEvent): Promise<void> {
-  console.log(`Event for user ${user.id}:`, {
-    name: event.name,
-    value: event.value,
-    metadata: {
+  await initializeStatsig();
+  
+  const userContext = {
+    userID: user.id,
+    custom: {
+      country: user.country,
+      device: user.device
+    }
+  };
+  
+  if (!statsigInitialized) {
+    console.log(`Event for user ${user.id}:`, {
+      name: event.name,
+      value: event.value,
+      metadata: {
+        ...event.metadata,
+        user_id: user.id,
+        country: user.country,
+        device: user.device,
+        timestamp: new Date().toISOString(),
+      },
+    });
+    return; // Do not log to Statsig if not initialized
+  }
+
+  try {
+    Statsig.logEvent(userContext, event.name, event.value, {
       ...event.metadata,
-      user_id: user.id,
       country: user.country,
       device: user.device,
       timestamp: new Date().toISOString(),
-    },
-  });
+    });
+    
+    // console.log(`📊 Logged event for user ${user.id}: ${event.name}`);
+  } catch (error) {
+    console.warn(`Error logging event ${event.name}:`, error);
+  }
 }
 
 /**
@@ -235,13 +298,8 @@ async function generateTraffic(userCount: number, maxActions: number): Promise<v
   console.log(`Generating traffic for ${userCount} users with max ${maxActions} actions each...`);
   console.log(`Base URL: ${BASE_URL}`);
   
-  // Check for server secret (for future Statsig integration)
-  const serverSecret = process.env.STATSIG_SERVER_SECRET;
-  if (!serverSecret) {
-    console.warn('STATSIG_SERVER_SECRET not found - running in mock mode');
-  } else {
-    console.log('Statsig server secret found - ready for integration');
-  }
+  // Initialize Statsig
+  await initializeStatsig();
 
   // Generate users and simulate journeys
   const users: User[] = [];
@@ -265,11 +323,14 @@ async function generateTraffic(userCount: number, maxActions: number): Promise<v
     }
   }
 
+  // Shutdown Statsig to flush all events
+  if (statsigInitialized) {
+    await Statsig.shutdown();
+    console.log('Statsig shutdown completed - all events flushed');
+  }
+
   console.log('Traffic generation completed!');
-  console.log('Note: This is a mock implementation. For real Statsig integration:');
-  console.log('1. Install statsig-node: npm install statsig-node');
-  console.log('2. Set STATSIG_SERVER_SECRET in .env.traffic.local');
-  console.log('3. Replace mock functions with real Statsig API calls');
+  console.log('Events and exposures have been sent to Statsig');
 }
 
 /**
