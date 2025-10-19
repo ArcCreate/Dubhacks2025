@@ -88,8 +88,7 @@ const hardcodedAnalysis = {
           color: "text-red-600",
         },
       },
-    },
-    // --- New Hardcoded Idea (Card 3) ---
+    }, // --- New Hardcoded Idea (Card 3) ---
     {
       id: 3,
       title: "Run A/B Test: Move Checkout Button Above Cart Summary",
@@ -149,11 +148,15 @@ const MetricDisplay = ({ name, data }) => (
       borderBottom: "1px solid #EBECF0",
     }}
   >
-    <div style={{ color: "#5E6C84", fontWeight: "600", flex: 1 }}>{name}</div>
+       {" "}
+    <div style={{ color: "#5E6C84", fontWeight: "600", flex: 1 }}>{name}</div> 
+     {" "}
     <div style={{ flex: 2 }}>
+           {" "}
       <div className={data.color} style={{ fontWeight: "700" }}>
-        {data.value}
+                {data.value}     {" "}
       </div>
+           {" "}
       <p
         style={{
           fontSize: "0.75rem",
@@ -161,9 +164,11 @@ const MetricDisplay = ({ name, data }) => (
           marginTop: "0.25rem",
         }}
       >
-        {data.explanation}
+                {data.explanation}     {" "}
       </p>
+         {" "}
     </div>
+     {" "}
   </div>
 );
 
@@ -185,8 +190,22 @@ const IdeaCard = ({ idea, index }) => {
     borderLeft: "4px solid #0052CC",
   };
 
+  const getMetricBorderColor = (colorClass) => {
+    switch (colorClass) {
+      case "text-green-600":
+        return "#00B872"; // Brighter Green
+      case "text-yellow-600":
+        return "#FFAB00"; // Brighter Yellow/Orange
+      case "text-red-600":
+        return "#FF5630"; // Brighter Red
+      default:
+        return "#172B4D";
+    }
+  };
+
   return (
     <div style={cardStyle}>
+           {" "}
       <h2
         style={{
           fontSize: "1.125rem",
@@ -195,8 +214,9 @@ const IdeaCard = ({ idea, index }) => {
           marginBottom: "0.75rem",
         }}
       >
-        Idea #{index + 1}: {title}
+                Idea #{index + 1}: {title}     {" "}
       </h2>
+           {" "}
       <div
         style={{
           fontSize: "0.875rem",
@@ -207,12 +227,12 @@ const IdeaCard = ({ idea, index }) => {
           marginBottom: "1.5rem",
         }}
       >
-        Time to Value:{" "}
-        <span style={{ fontWeight: "700" }}>{timeToValueDays} Days</span>
+                Time to Value:        {" "}
+        <span style={{ fontWeight: "700" }}>{timeToValueDays} Days</span>     {" "}
       </div>
-
-      {/* RICE Metrics - 4-box layout like Jira ticket */}
+            {/* RICE Metrics - 4-box layout like Jira ticket */}     {" "}
       <div style={{ marginBottom: "1.5rem" }}>
+               {" "}
         <h3
           style={{
             fontSize: "0.875rem",
@@ -221,9 +241,9 @@ const IdeaCard = ({ idea, index }) => {
             marginBottom: "0.75rem",
           }}
         >
-          📊 Core RICE Metrics
+                    📊 Core RICE Metrics        {" "}
         </h3>
-
+               {" "}
         <div
           style={{
             display: "grid",
@@ -231,13 +251,9 @@ const IdeaCard = ({ idea, index }) => {
             gap: "1rem",
           }}
         >
+                   {" "}
           {Object.entries(metrics).map(([key, data]) => {
-            const colorMap = {
-              "text-green-600": "#0B6E4F",
-              "text-yellow-600": "#974F0C",
-              "text-red-600": "#BF2600",
-            };
-            const borderColor = colorMap[data.color] || "#172B4D";
+            const borderColor = getMetricBorderColor(data.color);
 
             return (
               <div
@@ -249,6 +265,7 @@ const IdeaCard = ({ idea, index }) => {
                   borderLeft: `3px solid ${borderColor}`,
                 }}
               >
+                               {" "}
                 <div
                   style={{
                     fontSize: "0.75rem",
@@ -257,8 +274,10 @@ const IdeaCard = ({ idea, index }) => {
                     marginBottom: "0.25rem",
                   }}
                 >
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                 {" "}
                 </div>
+                               {" "}
                 <div
                   style={{
                     fontSize: "1.125rem",
@@ -267,8 +286,9 @@ const IdeaCard = ({ idea, index }) => {
                     marginBottom: "0.25rem",
                   }}
                 >
-                  {data.value}
+                                    {data.value}               {" "}
                 </div>
+                               {" "}
                 <div
                   style={{
                     fontSize: "0.75rem",
@@ -276,15 +296,17 @@ const IdeaCard = ({ idea, index }) => {
                     lineHeight: "1.4",
                   }}
                 >
-                  {data.explanation}
+                                    {data.explanation}               {" "}
                 </div>
+                             {" "}
               </div>
             );
           })}
+                 {" "}
         </div>
+             {" "}
       </div>
-
-      {/* Rationale - Moved to be second */}
+            {/* Rationale - Moved to be second */}     {" "}
       <div
         style={{
           backgroundColor: "#F4F5F7",
@@ -293,6 +315,7 @@ const IdeaCard = ({ idea, index }) => {
           marginBottom: "1rem",
         }}
       >
+               {" "}
         <h3
           style={{
             fontSize: "0.875rem",
@@ -301,8 +324,9 @@ const IdeaCard = ({ idea, index }) => {
             marginBottom: "0.5rem",
           }}
         >
-          Short Rationale
+                    Short Rationale        {" "}
         </h3>
+               {" "}
         <p
           style={{
             fontSize: "0.875rem",
@@ -310,11 +334,11 @@ const IdeaCard = ({ idea, index }) => {
             lineHeight: "1.4",
           }}
         >
-          {rationale}
+                    {rationale}       {" "}
         </p>
+             {" "}
       </div>
-
-      {/* Implementation Suggestion - Moved to be third */}
+            {/* Implementation Suggestion - Moved to be third */}     {" "}
       {implementationSuggestion && (
         <div
           style={{
@@ -324,6 +348,7 @@ const IdeaCard = ({ idea, index }) => {
             marginBottom: "0",
           }}
         >
+                   {" "}
           <h3
             style={{
               fontSize: "0.875rem",
@@ -332,8 +357,9 @@ const IdeaCard = ({ idea, index }) => {
               marginBottom: "0.5rem",
             }}
           >
-            💡 Implementation Suggestion
+                        💡 Implementation Suggestion          {" "}
           </h3>
+                   {" "}
           <p
             style={{
               fontSize: "0.875rem",
@@ -341,10 +367,12 @@ const IdeaCard = ({ idea, index }) => {
               lineHeight: "1.4",
             }}
           >
-            {implementationSuggestion}
+                        {implementationSuggestion}         {" "}
           </p>
+                 {" "}
         </div>
       )}
+         {" "}
     </div>
   );
 };
@@ -359,28 +387,29 @@ const OtherIdeaSummary = ({ idea }) => (
       borderBottom: "1px dashed #EBECF0",
     }}
   >
-    <div style={{ fontWeight: "600", color: "#172B4D" }}>{idea.title}</div>
+        <div style={{ fontWeight: "600", color: "#172B4D" }}>{idea.title}</div> 
+     {" "}
     <div style={{ fontSize: "0.875rem", color: "#5E6C84" }}>
-      <span style={{ fontWeight: "600" }}>Reason Lower:</span>{" "}
-      {idea.reasonLower}
+            <span style={{ fontWeight: "600" }}>Reason Lower:</span>      {" "}
+      {idea.reasonLower}   {" "}
     </div>
+     {" "}
   </div>
 );
 
 // --- NEW Jira Ticket Component for a nicer look ---
 const JiraTicketCard = ({ ideaData }) => {
   const { title, details, metrics } = ideaData;
-  const { description, acceptanceCriteria, references } = details;
+  const { description, acceptanceCriteria, references } = details; // Function to determine the BRIGHTER, VIBRANT color for the RICE values
 
-  // Function to determine the color for the RICE values
   const getColor = (colorClass) => {
     switch (colorClass) {
       case "text-green-600":
-        return "#0B6E4F"; // Dark Green
+        return "#00B872"; // Bright Green
       case "text-yellow-600":
-        return "#974F0C"; // Dark Yellow/Orange
+        return "#FFAB00"; // Vibrant Orange/Yellow
       case "text-red-600":
-        return "#BF2600"; // Dark Red
+        return "#FF5630"; // Vibrant Red
       default:
         return "#172B4D";
     }
@@ -398,7 +427,7 @@ const JiraTicketCard = ({ ideaData }) => {
         animation: "fadeIn 0.8s ease-in-out",
       }}
     >
-      {/* Header and Key Info */}
+            {/* Header and Key Info */}     {" "}
       <div
         style={{
           display: "flex",
@@ -408,6 +437,7 @@ const JiraTicketCard = ({ ideaData }) => {
           paddingBottom: "1rem",
         }}
       >
+               {" "}
         <h3
           style={{
             fontSize: "1.25rem",
@@ -419,6 +449,7 @@ const JiraTicketCard = ({ ideaData }) => {
             gap: "0.5rem",
           }}
         >
+                   {" "}
           <span
             style={{
               backgroundColor: "#F4F5F7",
@@ -429,10 +460,11 @@ const JiraTicketCard = ({ ideaData }) => {
               color: "#42526E",
             }}
           >
-            FEAT-101
+                        FEAT-101          {" "}
           </span>
-          {title}
+                    {title}       {" "}
         </h3>
+               {" "}
         <span
           style={{
             backgroundColor: "#36B37E", // Green for 'Ready'
@@ -443,12 +475,13 @@ const JiraTicketCard = ({ ideaData }) => {
             fontWeight: "700",
           }}
         >
-          READY FOR DEV
+                    READY FOR DEV        {" "}
         </span>
+             {" "}
       </div>
-
-      {/* RICE Summary Table */}
+            {/* RICE Summary Table */}     {" "}
       <div style={{ marginBottom: "1.5rem" }}>
+               {" "}
         <h4
           style={{
             fontSize: "1rem",
@@ -457,8 +490,9 @@ const JiraTicketCard = ({ ideaData }) => {
             marginBottom: "0.75rem",
           }}
         >
-          📊 RICE Score Analysis
+                    📊 RICE Score Analysis        {" "}
         </h4>
+               {" "}
         <div
           style={{
             display: "grid",
@@ -466,6 +500,7 @@ const JiraTicketCard = ({ ideaData }) => {
             gap: "1rem",
           }}
         >
+                   {" "}
           {Object.entries(metrics).map(([key, data]) => (
             <div
               key={key}
@@ -476,6 +511,7 @@ const JiraTicketCard = ({ ideaData }) => {
                 borderLeft: `3px solid ${getColor(data.color)}`,
               }}
             >
+                           {" "}
               <div
                 style={{
                   fontSize: "0.75rem",
@@ -484,8 +520,9 @@ const JiraTicketCard = ({ ideaData }) => {
                   marginBottom: "0.25rem",
                 }}
               >
-                {key.toUpperCase()}
+                                {key.toUpperCase()}             {" "}
               </div>
+                           {" "}
               <div
                 style={{
                   fontSize: "1.125rem",
@@ -493,8 +530,9 @@ const JiraTicketCard = ({ ideaData }) => {
                   color: getColor(data.color),
                 }}
               >
-                {data.value}
+                                {data.value}             {" "}
               </div>
+                           {" "}
               <div
                 style={{
                   fontSize: "0.75rem",
@@ -502,15 +540,18 @@ const JiraTicketCard = ({ ideaData }) => {
                   marginTop: "0.25rem",
                 }}
               >
-                {data.explanation}
+                                {data.explanation}             {" "}
               </div>
+                         {" "}
             </div>
           ))}
+                 {" "}
         </div>
+             {" "}
       </div>
-
-      {/* Detailed Description */}
+            {/* Detailed Description */}     {" "}
       <div style={{ marginBottom: "1.5rem" }}>
+               {" "}
         <h4
           style={{
             fontSize: "1rem",
@@ -519,14 +560,15 @@ const JiraTicketCard = ({ ideaData }) => {
             marginBottom: "0.5rem",
           }}
         >
-          📝 Detailed Description
+                    📝 Detailed Description        {" "}
         </h4>
+               {" "}
         <p style={{ fontSize: "0.9rem", color: "#42526E", lineHeight: "1.5" }}>
-          {description}
+                    {description}       {" "}
         </p>
+             {" "}
       </div>
-
-      {/* Acceptance Criteria (Checklist) */}
+            {/* Acceptance Criteria (Checklist) */}     {" "}
       <div
         style={{
           marginBottom: "1.5rem",
@@ -535,6 +577,7 @@ const JiraTicketCard = ({ ideaData }) => {
           borderRadius: "6px",
         }}
       >
+               {" "}
         <h4
           style={{
             fontSize: "1rem",
@@ -543,8 +586,9 @@ const JiraTicketCard = ({ ideaData }) => {
             marginBottom: "0.5rem",
           }}
         >
-          ✅ Acceptance Criteria
+                    ✅ Acceptance Criteria        {" "}
         </h4>
+               {" "}
         <ul
           style={{
             fontSize: "0.9rem",
@@ -554,13 +598,18 @@ const JiraTicketCard = ({ ideaData }) => {
             listStyleType: "none",
           }}
         >
+                   {" "}
           {acceptanceCriteria.map((item, i) => (
             <li key={i} style={{ marginBottom: "0.25rem" }}>
-              <span style={{ marginRight: "0.5rem" }}>•</span> {item}
+                            <span style={{ marginRight: "0.5rem" }}>•</span>{" "}
+              {item}           {" "}
             </li>
           ))}
+                 {" "}
         </ul>
+             {" "}
       </div>
+         {" "}
     </div>
   );
 };
@@ -579,10 +628,9 @@ function App() {
   const analyzeIdea = () => {
     setAnalysisResult(null);
     setShowJiraTicket(false); // Hide ticket when running new analysis
-    setLoading(true);
-    setExperimentMessage("");
+    setExperimentMessage(""); // Clear message
+    setLoading(true); // Simulate API delay for demo
 
-    // Simulate API delay for demo
     setTimeout(() => {
       setAnalysisResult(hardcodedAnalysis);
       setLoading(false);
@@ -591,18 +639,16 @@ function App() {
 
   const createExperiment = () => {
     setExperimentMessage("Deploying to Statsig and automating Experiments...");
-    setShowJiraTicket(false);
+    setShowJiraTicket(false); // Simulate experiment running for 3 seconds before showing Jira ticket
 
-    // Simulate experiment running for 3 seconds before showing Jira ticket
     setTimeout(() => {
       setExperimentMessage(
         "✅ Experiment completed! AI recommends rollout. Jira Ticket auto-created."
       );
       setShowJiraTicket(true);
     }, 3000);
-  };
+  }; // Get the data for the first (highest priority) idea to populate the Jira ticket
 
-  // Get the data for the first (highest priority) idea to populate the Jira ticket
   const jiraTicketData = analysisResult ? analysisResult.topIdeas[0] : null;
 
   return (
@@ -619,15 +665,19 @@ function App() {
         minHeight: "100vh",
       }}
     >
+           {" "}
       <header style={{ textAlign: "center" }}>
+               {" "}
         <h1 style={{ margin: 0, fontSize: "1.8rem", color: "#172B4D" }}>
-          PredictIQ Analysis
+                    PredictIQ Analysis        {" "}
         </h1>
+               {" "}
         <p style={{ color: "#5E6C84", marginTop: "0.25rem" }}>
-          Paste a feature idea to see AI-powered RICE analysis
+                    Paste a feature idea to see AI-powered RICE analysis        {" "}
         </p>
+             {" "}
       </header>
-
+           {" "}
       <textarea
         value={ideaText}
         onChange={(e) => setIdeaText(e.target.value)}
@@ -642,7 +692,7 @@ function App() {
           resize: "none",
         }}
       />
-
+           {" "}
       <button
         onClick={analyzeIdea}
         disabled={loading}
@@ -657,9 +707,9 @@ function App() {
           transition: "background-color 0.2s",
         }}
       >
-        {loading ? "Analyzing Feature..." : "Analyze Feature/Idea"}
+                {loading ? "Analyzing Feature..." : "Analyze Feature/Idea"}     {" "}
       </button>
-
+           {" "}
       {loading && (
         <div
           style={{
@@ -672,13 +722,15 @@ function App() {
             fontWeight: "600",
           }}
         >
-          🔍 Analyzing data...
+                    🔍 Analyzing data...        {" "}
         </div>
       )}
-
+           {" "}
       {analysisResult && (
         <>
+                   {" "}
           <div style={{ marginTop: "1rem" }}>
+                       {" "}
             <h2
               style={{
                 fontSize: "1.5rem",
@@ -689,9 +741,9 @@ function App() {
                 paddingBottom: "0.5rem",
               }}
             >
-              Analysis Results
+                            Analysis Results            {" "}
             </h2>
-
+                       {" "}
             <h3
               style={{
                 fontSize: "1.125rem",
@@ -700,13 +752,13 @@ function App() {
                 marginBottom: "0.75rem",
               }}
             >
-              Top 3 Recommended Ideas:
+                            Top 3 Recommended Ideas:            {" "}
             </h3>
-
+                       {" "}
             {analysisResult.topIdeas.map((idea, index) => (
               <IdeaCard key={idea.id} idea={idea} index={index} />
             ))}
-
+                       {" "}
             <h3
               style={{
                 fontSize: "1.125rem",
@@ -716,9 +768,9 @@ function App() {
                 marginBottom: "0.5rem",
               }}
             >
-              Other Ideas Analyzed
+                            Other Ideas Analyzed            {" "}
             </h3>
-
+                       {" "}
             <div
               style={{
                 backgroundColor: "#FFF4F4", // light red tint
@@ -727,30 +779,36 @@ function App() {
                 boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
               }}
             >
+                           {" "}
               {analysisResult.otherIdeas.map((idea, index) => (
                 <OtherIdeaSummary key={index} idea={idea} />
               ))}
+                         {" "}
             </div>
-
-            <button
-              onClick={createExperiment}
-              style={{
-                marginTop: "1.5rem",
-                backgroundColor: "#4C9AFF", // Atlassian light blue
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.75rem 1.5rem",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "background-color 0.2s",
-              }}
-            >
-              Create Experiments & Jira Ticket
-            </button>
-
-            {experimentMessage && (
+                       {" "}
+            {/* CONDITIONAL RENDERING: Hide button and message if ticket is showing */}
+                       {" "}
+            {!showJiraTicket && (
+              <button
+                onClick={createExperiment}
+                style={{
+                  marginTop: "1.5rem",
+                  backgroundColor: "#4C9AFF", // Atlassian light blue
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "0.75rem 1.5rem",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "background-color 0.2s",
+                }}
+              >
+                                Create Experiments & Jira Ticket              {" "}
+              </button>
+            )}
+                       {" "}
+            {experimentMessage && !showJiraTicket && (
               <div
                 style={{
                   marginTop: "0.75rem",
@@ -761,17 +819,19 @@ function App() {
                   fontWeight: "600",
                 }}
               >
-                {experimentMessage}
+                                {experimentMessage}             {" "}
               </div>
             )}
-
-            {/* Render the new, nicer Jira Ticket */}
+                        {/* Render the new, nicer Jira Ticket */}           {" "}
             {showJiraTicket && jiraTicketData && (
               <JiraTicketCard ideaData={jiraTicketData} />
             )}
+                     {" "}
           </div>
+                 {" "}
         </>
       )}
+         {" "}
     </div>
   );
 }
