@@ -1,200 +1,124 @@
 import React, { useState } from "react";
 
-// --- Configuration ---
-const ROVO_CONFIG = {
-  apiUrl: 'https://your-rovo-agent-endpoint.atlassian.net/api/agent',
-  apiKey: 'your-api-key-here',
-  enabled: true, // Set to false to always use hardcoded data
-};
-
-// --- Rovo API Service ---
-const callRovoAgent = async (featureIdea) => {
-  if (!ROVO_CONFIG.enabled) {
-    return { success: false, error: 'Rovo API disabled' };
-  }
-
-  try {
-    const response = await fetch(ROVO_CONFIG.apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ROVO_CONFIG.apiKey}`,
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        query: featureIdea,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API call failed with status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return { success: true, data };
-  } catch (error) {
-    console.error('Rovo Agent API Error:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// --- Data Transformer ---
-const getColorForMetric = (metricName, value) => {
-  if (metricName === 'reach') {
-    const numValue = typeof value === 'string' ? parseInt(value) : value;
-    if (numValue >= 70) return 'text-green-600';
-    if (numValue >= 40) return 'text-yellow-600';
-    return 'text-red-600';
-  }
-  
-  if (metricName === 'impact') {
-    if (value >= 8) return 'text-green-600';
-    if (value >= 5) return 'text-yellow-600';
-    return 'text-red-600';
-  }
-  
-  if (metricName === 'confidence') {
-    const numValue = typeof value === 'string' ? parseInt(value) : value;
-    if (numValue >= 80) return 'text-green-600';
-    if (numValue >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  }
-  
-  if (metricName === 'effort') {
-    const numValue = typeof value === 'string' ? parseInt(value) : value;
-    if (numValue <= 40) return 'text-green-600';
-    if (numValue <= 80) return 'text-yellow-600';
-    return 'text-red-600';
-  }
-  
-  return 'text-gray-600';
-};
-
-const transformRovoResponse = (rovoData) => {
-  const topIdeas = rovoData.top_solutions.map((solution, index) => ({
-    id: index + 1,
-    title: solution.feature_name,
-    timeToValueDays: solution.time_to_value_days,
-    rationale: solution.short_rationale,
-    implementationSuggestion: solution.implementation_suggestion,
-    metrics: {
-      reach: {
-        value: solution.reach.value,
-        explanation: solution.reach.explanation,
-        color: getColorForMetric('reach', solution.reach.value),
-      },
-      impact: {
-        value: solution.impact.value,
-        explanation: solution.impact.explanation,
-        color: getColorForMetric('impact', solution.impact.value),
-      },
-      confidence: {
-        value: `${solution.confidence.value}%`,
-        explanation: solution.confidence.explanation,
-        color: getColorForMetric('confidence', solution.confidence.value),
-      },
-      effort: {
-        value: solution.effort.value,
-        explanation: solution.effort.explanation,
-        color: getColorForMetric('effort', solution.effort.value),
-      },
-    },
-  }));
-
-  const otherIdeas = rovoData.non_top_solutions.map((solution) => ({
-    title: solution.title,
-    reasonLower: solution.reason_lower_score,
-  }));
-
-  return {
-    topIdeas,
-    otherIdeas,
-  };
-};
-
-// --- Hardcoded Fallback Data ---
+// --- Hardcoded Demo Data ---
 const hardcodedAnalysis = {
+  summary:
+    "Based on recent conversion data and prior experiments, the drop in checkout completion appears linked to button visibility and visual salience. Experiment exp_one_click_checkout_color_2025Q4 showed that the red button improved conversions by 7.2% over the blue baseline. PredictIQ recommends implementing this proven variant globally.",
   topIdeas: [
     {
       id: 1,
-      title: "Quick Add Button on Dashboard",
-      timeToValueDays: 5,
-      rationale: "This feature automates a high-traffic workflow for new task creation, directly addressing a primary user pain point. Similar past features focusing on reducing steps in core workflows increased engagement by ~35%. Moderate effort is predicted because backend integration is required for real-time validation, necessitating 2 backend endpoints and a complex UI component.",
+      title: "Roll Out Red One-Click Checkout Button to 100% of Users",
+      timeToValueDays: 4,
+      rationale:
+        "The Red Button variant in experiment exp_one_click_checkout_color_2025Q4 demonstrated a statistically significant +7.2% lift in purchases (p = 0.032) over the Blue Button baseline. No negative impact observed on add_to_cart or product_click metrics. Rolling it out to all users will recover lost conversions and streamline the checkout experience.",
+      implementationSuggestion:
+        "Update the checkout button color to red for all users in One-Click Checkout. Remove experiment gating logic. Archive the experiment after rollout.",
+      details: {
+        description:
+          "Implement the Red Button variant for the One-Click Checkout flow, as determined by the Statsig experiment (exp_one_click_checkout_color_2025Q4). The Red Button demonstrated a statistically significant 7.2% lift in purchases (p = 0.032) over the baseline, outperforming the Blue Button. Secondary metrics (add_to_cart, product_click) showed no significant differences.",
+        acceptanceCriteria: [
+          "Update the checkout button color to red for all users.",
+          "Update components: src/components/CheckoutButton.tsx, src/hooks/useCheckout.ts, src/experiments/oneClickCheckout.statsig.ts (archive gating logic).",
+          "Monitor add_to_cart and product_click metrics post-rollout.",
+          "Archive the experiment in Statsig after successful rollout.",
+        ],
+        notes: [
+          "Coordinate with analytics to ensure post-rollout monitoring.",
+          "Communicate change to relevant stakeholders.",
+        ],
+        references: [
+          "Experiment ID: exp_one_click_checkout_color_2025Q4",
+          "Attach Statsig experiment report link.",
+        ],
+      },
       metrics: {
         reach: {
-          value: "85%",
-          explanation: "Impacts 85% of active users who interact with the main dashboard (1,200 users/week).",
+          value: "100%",
+          explanation: "Affects all checkout users globally.",
           color: "text-green-600",
         },
         impact: {
           value: 9,
-          explanation: "High because this dramatically simplifies the most common action (adding a task), improving conversion by an estimated 15%.",
+          explanation: "Directly increases conversion rate by +7.2%.",
           color: "text-green-600",
         },
         confidence: {
-          value: "90%",
-          explanation: "Confidence is high due to clear, quantitative data from similar, high-traffic feature improvements in Q1.",
+          value: "95%",
+          explanation:
+            "Strong statistical confidence from prior experiment results.",
           color: "text-green-600",
         },
         effort: {
-          value: "60 Hours",
-          explanation: "Requires API integration, 2 new backend endpoints, and 1 complex React UI component with modal state.",
-          color: "text-yellow-600",
+          value: "20 Hours",
+          explanation: "UI update plus cleanup of experiment logic.",
+          color: "text-green-600",
         },
       },
     },
     {
       id: 2,
-      title: "AI-Powered Task Categorization",
+      title: "Add Micro-Interaction to Checkout Button (Pulse Animation)",
       timeToValueDays: 10,
-      rationale: "The model predicts that automatic task categorization will significantly reduce cognitive load. The moderate confidence level stems from the fact that this is an experimental ML feature, and limited past analogues exist. The high effort is driven by the need to integrate with the ML inference service.",
+      rationale:
+        "Visual hesitation may also stem from lack of perceived feedback. Adding a subtle pulse animation could improve engagement, though it needs validation.",
+      implementationSuggestion:
+        "Prototype using Framer Motion pulse animation in CheckoutButton.tsx. Validate accessibility and measure impact in new A/B test.",
       metrics: {
         reach: {
-          value: "65%",
-          explanation: "Impacts users who manually categorize their tasks, representing 65% of the user base (950 users/week).",
-          color: "text-yellow-600",
+          value: "100%",
+          explanation: "All users exposed if rolled out globally.",
+          color: "text-green-600",
         },
         impact: {
-          value: 7,
-          explanation: "Moderate-high, as it removes friction but only for a secondary action after task creation is complete.",
+          value: 6,
+          explanation:
+            "Potential moderate improvement if animation enhances attention.",
           color: "text-yellow-600",
         },
         confidence: {
-          value: "75%",
-          explanation: "Confidence is lower due to limited past analogues in this specific ML/product area; data is mostly qualitative.",
+          value: "65%",
+          explanation:
+            "Unvalidated hypothesis—no historical data on motion impact here.",
           color: "text-yellow-600",
         },
         effort: {
-          value: "120 Story Points",
-          explanation: "Requires setting up a new ML inference pipeline and updating data schemas, driving high story point allocation.",
+          value: "45 Hours",
+          explanation:
+            "Requires design sign-off, accessibility validation, and QA.",
           color: "text-red-600",
         },
       },
     },
+    // --- New Hardcoded Idea (Card 3) ---
     {
       id: 3,
-      title: "Advanced Filtering Options",
-      timeToValueDays: 3,
-      rationale: "Users often complain about difficulty finding specific tasks in large projects. This low-effort feature addresses core UX friction. Since this is purely a frontend update with no new API calls, the time to value is extremely fast.",
+      title: "Run A/B Test: Move Checkout Button Above Cart Summary",
+      timeToValueDays: 14,
+      rationale:
+        "A small segment of users may be failing to see the button due to visual noise from the large cart summary below. Moving the button higher could improve 'above the fold' visibility, which requires an A/B test to validate.",
+      implementationSuggestion:
+        "Refactor CheckoutPageLayout.tsx to render the CheckoutButton component above the CartSummary component for the 'test' variant. Set up a 50/50 A/B test for 2 weeks to measure lift in purchases.",
       metrics: {
         reach: {
-          value: "40%",
-          explanation: "Only impacts advanced power users with high task volumes (approx. 400 users/week).",
-          color: "text-red-600",
+          value: "90%",
+          explanation: "Affects all users on the checkout page.",
+          color: "text-green-600",
         },
         impact: {
-          value: 6,
-          explanation: "Moderate. It's a quality-of-life improvement that increases satisfaction but doesn't drive core revenue or conversion.",
-          color: "text-yellow-600",
+          value: 7,
+          explanation:
+            "High potential for improvement if placement is the key issue.",
+          color: "text-green-600",
         },
         confidence: {
-          value: "80%",
-          explanation: "Moderate confidence, backed by direct user interview data and support ticket analysis.",
+          value: "75%",
+          explanation:
+            "Based on heatmap data showing users scroll past the button.",
           color: "text-yellow-600",
         },
         effort: {
-          value: "30 Hours",
-          explanation: "Frontend-only change, primarily updating the state management and existing filter component logic.",
+          value: "10 Hours",
+          explanation: "Minor component re-ordering and experiment setup.",
           color: "text-green-600",
         },
       },
@@ -202,12 +126,14 @@ const hardcodedAnalysis = {
   ],
   otherIdeas: [
     {
-      title: "Customizable Color Themes",
-      reasonLower: "Low impact on core business metrics (Impact 3) and high required effort (40 hours) for limited gain.",
+      title: "Add Checkout Tooltip for First-Time Users",
+      reasonLower:
+        "Low reach; affects <10% of users. Doesn’t address main hesitation issue.",
     },
     {
-      title: "Integrate with Google Calendar",
-      reasonLower: "High development effort (80 hours) coupled with a low user reach (15% of users actively request this integration).",
+      title: "Re-run full UI redesign experiment",
+      reasonLower:
+        "High cost and long turnaround; unnecessary given clear existing signal from button color test.",
     },
   ],
 };
@@ -242,8 +168,13 @@ const MetricDisplay = ({ name, data }) => (
 );
 
 const IdeaCard = ({ idea, index }) => {
-  const { title, rationale, timeToValueDays, metrics, implementationSuggestion } = idea;
-  const isTopIdea = index !== undefined;
+  const {
+    title,
+    rationale,
+    timeToValueDays,
+    metrics,
+    implementationSuggestion,
+  } = idea;
 
   const cardStyle = {
     backgroundColor: "white",
@@ -251,7 +182,7 @@ const IdeaCard = ({ idea, index }) => {
     padding: "1.5rem",
     boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
     marginBottom: "1rem",
-    borderLeft: isTopIdea ? "4px solid #0052CC" : "none",
+    borderLeft: "4px solid #0052CC",
   };
 
   return (
@@ -264,100 +195,155 @@ const IdeaCard = ({ idea, index }) => {
           marginBottom: "0.75rem",
         }}
       >
-        {isTopIdea ? `🚀 Idea #${index + 1}: ${title}` : title}
+        Idea #{index + 1}: {title}
       </h2>
-      {isTopIdea && (
-        <>
-          <div
-            style={{
-              backgroundColor: "#F4F5F7",
-              padding: "1rem",
-              borderRadius: "6px",
-              marginBottom: "1rem",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: "600",
-                color: "#172B4D",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Short Rationale
-            </h3>
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: "#5E6C84",
-                lineHeight: "1.4",
-              }}
-            >
-              {rationale}
-            </p>
-          </div>
+      <div
+        style={{
+          fontSize: "0.875rem",
+          fontWeight: "600",
+          color: "#0052CC",
+          borderBottom: "1px solid #EBECF0",
+          paddingBottom: "1rem",
+          marginBottom: "1.5rem",
+        }}
+      >
+        Time to Value:{" "}
+        <span style={{ fontWeight: "700" }}>{timeToValueDays} Days</span>
+      </div>
 
-          {implementationSuggestion && (
-            <div
-              style={{
-                backgroundColor: "#E3FCEF",
-                padding: "1rem",
-                borderRadius: "6px",
-                marginBottom: "1rem",
-              }}
-            >
-              <h3
+      {/* RICE Metrics - 4-box layout like Jira ticket */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h3
+          style={{
+            fontSize: "0.875rem",
+            fontWeight: "700",
+            color: "#172B4D",
+            marginBottom: "0.75rem",
+          }}
+        >
+          📊 Core RICE Metrics
+        </h3>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "1rem",
+          }}
+        >
+          {Object.entries(metrics).map(([key, data]) => {
+            const colorMap = {
+              "text-green-600": "#0B6E4F",
+              "text-yellow-600": "#974F0C",
+              "text-red-600": "#BF2600",
+            };
+            const borderColor = colorMap[data.color] || "#172B4D";
+
+            return (
+              <div
+                key={key}
                 style={{
-                  fontSize: "0.875rem",
-                  fontWeight: "600",
-                  color: "#0B6E4F",
-                  marginBottom: "0.5rem",
+                  backgroundColor: "#F4F5F7",
+                  padding: "0.75rem",
+                  borderRadius: "6px",
+                  borderLeft: `3px solid ${borderColor}`,
                 }}
               >
-                💡 Implementation Suggestion
-              </h3>
-              <p
-                style={{
-                  fontSize: "0.875rem",
-                  color: "#0B6E4F",
-                  lineHeight: "1.4",
-                }}
-              >
-                {implementationSuggestion}
-              </p>
-            </div>
-          )}
+                <div
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "#5E6C84",
+                    fontWeight: "600",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </div>
+                <div
+                  style={{
+                    fontSize: "1.125rem",
+                    fontWeight: "700",
+                    color: borderColor,
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  {data.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "#5E6C84",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  {data.explanation}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-          <div style={{ marginBottom: "1.5rem" }}>
-            <h3
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: "600",
-                color: "#172B4D",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Core RICE Metrics
-            </h3>
-            <MetricDisplay name="Reach" data={metrics.reach} />
-            <MetricDisplay name="Impact (1-10)" data={metrics.impact} />
-            <MetricDisplay name="Confidence" data={metrics.confidence} />
-            <MetricDisplay name="Effort" data={metrics.effort} />
-          </div>
+      {/* Rationale - Moved to be second */}
+      <div
+        style={{
+          backgroundColor: "#F4F5F7",
+          padding: "1rem",
+          borderRadius: "6px",
+          marginBottom: "1rem",
+        }}
+      >
+        <h3
+          style={{
+            fontSize: "0.875rem",
+            fontWeight: "600",
+            color: "#172B4D",
+            marginBottom: "0.5rem",
+          }}
+        >
+          Short Rationale
+        </h3>
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "#5E6C84",
+            lineHeight: "1.4",
+          }}
+        >
+          {rationale}
+        </p>
+      </div>
 
-          <div
+      {/* Implementation Suggestion - Moved to be third */}
+      {implementationSuggestion && (
+        <div
+          style={{
+            backgroundColor: "#E3FCEF",
+            padding: "1rem",
+            borderRadius: "6px",
+            marginBottom: "0",
+          }}
+        >
+          <h3
             style={{
               fontSize: "0.875rem",
               fontWeight: "600",
-              color: "#0052CC",
-              borderTop: "1px solid #EBECF0",
-              paddingTop: "1rem",
+              color: "#0B6E4F",
+              marginBottom: "0.5rem",
             }}
           >
-            Time to Value:{" "}
-            <span style={{ fontWeight: "700" }}>{timeToValueDays} Days</span>
-          </div>
-        </>
+            💡 Implementation Suggestion
+          </h3>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "#0B6E4F",
+              lineHeight: "1.4",
+            }}
+          >
+            {implementationSuggestion}
+          </p>
+        </div>
       )}
     </div>
   );
@@ -381,29 +367,200 @@ const OtherIdeaSummary = ({ idea }) => (
   </div>
 );
 
-const StatusBanner = ({ type, message }) => {
-  const styles = {
-    info: { bg: "#DEEBFF", color: "#0747A6" },
-    success: { bg: "#E3FCEF", color: "#0B6E4F" },
-    warning: { bg: "#FFFAE6", color: "#974F0C" },
-    error: { bg: "#FFEBE6", color: "#BF2600" },
-  };
+// --- NEW Jira Ticket Component for a nicer look ---
+const JiraTicketCard = ({ ideaData }) => {
+  const { title, details, metrics } = ideaData;
+  const { description, acceptanceCriteria, references } = details;
 
-  const style = styles[type] || styles.info;
+  // Function to determine the color for the RICE values
+  const getColor = (colorClass) => {
+    switch (colorClass) {
+      case "text-green-600":
+        return "#0B6E4F"; // Dark Green
+      case "text-yellow-600":
+        return "#974F0C"; // Dark Yellow/Orange
+      case "text-red-600":
+        return "#BF2600"; // Dark Red
+      default:
+        return "#172B4D";
+    }
+  };
 
   return (
     <div
       style={{
-        backgroundColor: style.bg,
-        color: style.color,
-        padding: "0.75rem 1rem",
-        borderRadius: "6px",
-        fontSize: "0.875rem",
-        fontWeight: "600",
-        marginBottom: "1rem",
+        marginTop: "1rem",
+        backgroundColor: "white",
+        borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        padding: "1.5rem",
+        borderLeft: "4px solid #0052CC", // Jira Blue Status Bar
+        animation: "fadeIn 0.8s ease-in-out",
       }}
     >
-      {message}
+      {/* Header and Key Info */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "1rem",
+          borderBottom: "1px solid #EBECF0",
+          paddingBottom: "1rem",
+        }}
+      >
+        <h3
+          style={{
+            fontSize: "1.25rem",
+            fontWeight: "800",
+            color: "#172B4D",
+            margin: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span
+            style={{
+              backgroundColor: "#F4F5F7",
+              padding: "0.25rem 0.5rem",
+              borderRadius: "3px",
+              fontSize: "0.875rem",
+              fontWeight: "700",
+              color: "#42526E",
+            }}
+          >
+            FEAT-101
+          </span>
+          {title}
+        </h3>
+        <span
+          style={{
+            backgroundColor: "#36B37E", // Green for 'Ready'
+            color: "white",
+            padding: "0.25rem 0.75rem",
+            borderRadius: "1rem",
+            fontSize: "0.8rem",
+            fontWeight: "700",
+          }}
+        >
+          READY FOR DEV
+        </span>
+      </div>
+
+      {/* RICE Summary Table */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h4
+          style={{
+            fontSize: "1rem",
+            fontWeight: "700",
+            color: "#172B4D",
+            marginBottom: "0.75rem",
+          }}
+        >
+          📊 RICE Score Analysis
+        </h4>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "1rem",
+          }}
+        >
+          {Object.entries(metrics).map(([key, data]) => (
+            <div
+              key={key}
+              style={{
+                padding: "0.75rem",
+                backgroundColor: "#F4F5F7",
+                borderRadius: "4px",
+                borderLeft: `3px solid ${getColor(data.color)}`,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  color: "#5E6C84",
+                  fontWeight: "600",
+                  marginBottom: "0.25rem",
+                }}
+              >
+                {key.toUpperCase()}
+              </div>
+              <div
+                style={{
+                  fontSize: "1.125rem",
+                  fontWeight: "700",
+                  color: getColor(data.color),
+                }}
+              >
+                {data.value}
+              </div>
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  color: "#5E6C84",
+                  marginTop: "0.25rem",
+                }}
+              >
+                {data.explanation}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Detailed Description */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h4
+          style={{
+            fontSize: "1rem",
+            fontWeight: "700",
+            color: "#172B4D",
+            marginBottom: "0.5rem",
+          }}
+        >
+          📝 Detailed Description
+        </h4>
+        <p style={{ fontSize: "0.9rem", color: "#42526E", lineHeight: "1.5" }}>
+          {description}
+        </p>
+      </div>
+
+      {/* Acceptance Criteria (Checklist) */}
+      <div
+        style={{
+          marginBottom: "1.5rem",
+          backgroundColor: "#DEEBFF",
+          padding: "1rem",
+          borderRadius: "6px",
+        }}
+      >
+        <h4
+          style={{
+            fontSize: "1rem",
+            fontWeight: "700",
+            color: "#0747A6",
+            marginBottom: "0.5rem",
+          }}
+        >
+          ✅ Acceptance Criteria
+        </h4>
+        <ul
+          style={{
+            fontSize: "0.9rem",
+            color: "#0747A6",
+            marginLeft: "1.5rem",
+            padding: 0,
+            listStyleType: "none",
+          }}
+        >
+          {acceptanceCriteria.map((item, i) => (
+            <li key={i} style={{ marginBottom: "0.25rem" }}>
+              <span style={{ marginRight: "0.5rem" }}>•</span> {item}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
@@ -411,52 +568,42 @@ const StatusBanner = ({ type, message }) => {
 // --- Main App Component ---
 function App() {
   const [ideaText, setIdeaText] = useState(
-    "As a user, I want a new 'Quick Add' button on the dashboard to create new tasks quickly, saving me 3 clicks every time."
+    "Checkout conversions have dropped slightly this week. Users seem to hesitate before completing purchases. I suspect something about the checkout button or design might be causing friction."
   );
+
   const [loading, setLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [experimentMessage, setExperimentMessage] = useState("");
-  const [dataSource, setDataSource] = useState(null); // 'api' or 'fallback'
-  const [apiError, setApiError] = useState(null);
+  const [showJiraTicket, setShowJiraTicket] = useState(false);
 
-  const analyzeIdea = async () => {
+  const analyzeIdea = () => {
     setAnalysisResult(null);
+    setShowJiraTicket(false); // Hide ticket when running new analysis
     setLoading(true);
-    setDataSource(null);
-    setApiError(null);
     setExperimentMessage("");
 
-    // Try Rovo API first
-    const result = await callRovoAgent(ideaText);
-
-    if (result.success) {
-      // API call succeeded - transform and use the data
-      try {
-        const transformedData = transformRovoResponse(result.data);
-        setAnalysisResult(transformedData);
-        setDataSource('api');
-      } catch (transformError) {
-        console.error('Data transformation error:', transformError);
-        // If transformation fails, fall back to hardcoded data
-        setAnalysisResult(hardcodedAnalysis);
-        setDataSource('fallback');
-        setApiError('Data transformation failed. Showing demo data.');
-      }
-    } else {
-      // API call failed - use hardcoded fallback data
+    // Simulate API delay for demo
+    setTimeout(() => {
       setAnalysisResult(hardcodedAnalysis);
-      setDataSource('fallback');
-      setApiError(result.error);
-    }
-
-    setLoading(false);
+      setLoading(false);
+    }, 1500);
   };
 
   const createExperiment = () => {
-    setExperimentMessage(
-      "✅ Experiment created successfully! (Simulated response)"
-    );
+    setExperimentMessage("Deploying to Statsig and automating Experiments...");
+    setShowJiraTicket(false);
+
+    // Simulate experiment running for 3 seconds before showing Jira ticket
+    setTimeout(() => {
+      setExperimentMessage(
+        "✅ Experiment completed! AI recommends rollout. Jira Ticket auto-created."
+      );
+      setShowJiraTicket(true);
+    }, 3000);
   };
+
+  // Get the data for the first (highest priority) idea to populate the Jira ticket
+  const jiraTicketData = analysisResult ? analysisResult.topIdeas[0] : null;
 
   return (
     <div
@@ -477,7 +624,7 @@ function App() {
           PredictIQ Analysis
         </h1>
         <p style={{ color: "#5E6C84", marginTop: "0.25rem" }}>
-          Paste a feature idea to see AI-powered analysis from Rovo.
+          Paste a feature idea to see AI-powered RICE analysis
         </p>
       </header>
 
@@ -525,113 +672,105 @@ function App() {
             fontWeight: "600",
           }}
         >
-          Analyzing data...
+          🔍 Analyzing data...
         </div>
-      )}
-
-      {/* Data Source Indicator */}
-      {analysisResult && dataSource === 'api' && (
-        <StatusBanner
-          type="success"
-          message="✅ Data loaded from Rovo Agent"
-        />
-      )}
-
-      {analysisResult && dataSource === 'fallback' && (
-        <StatusBanner
-          type="warning"
-          message={`⚠️ Using demo data. ${apiError ? `API Error: ${apiError}` : 'Rovo API unavailable.'}`}
-        />
       )}
 
       {analysisResult && (
-        <div style={{ marginTop: "1rem" }}>
-          <h2
-            style={{
-              fontSize: "1.5rem",
-              fontWeight: "700",
-              color: "#172B4D",
-              marginBottom: "1rem",
-              borderBottom: "2px solid #EBECF0",
-              paddingBottom: "0.5rem",
-            }}
-          >
-            Analysis Results
-          </h2>
-
-          <h3
-            style={{
-              fontSize: "1.125rem",
-              fontWeight: "600",
-              color: "#172B4D",
-              marginBottom: "0.75rem",
-            }}
-          >
-            Top 3 Recommended Ideas:
-          </h3>
-
-          {analysisResult.topIdeas.map((idea, index) => (
-            <IdeaCard key={idea.id} idea={idea} index={index} />
-          ))}
-
-          <h3
-            style={{
-              fontSize: "1.125rem",
-              fontWeight: "600",
-              color: "#172B4D",
-              marginTop: "2rem",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Other Ideas Analyzed
-          </h3>
-
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "8px",
-              padding: "0 1.5rem",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
-            }}
-          >
-            {analysisResult.otherIdeas.map((idea, index) => (
-              <OtherIdeaSummary key={index} idea={idea} />
-            ))}
-          </div>
-
-          <button
-            onClick={createExperiment}
-            style={{
-              marginTop: "1.5rem",
-              backgroundColor: "#36B37E",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.75rem 1.5rem",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-            }}
-          >
-            Create Experiments
-          </button>
-
-          {experimentMessage && (
-            <div
+        <>
+          <div style={{ marginTop: "1rem" }}>
+            <h2
               style={{
-                marginTop: "0.75rem",
-                padding: "0.75rem 1rem",
-                backgroundColor: "#E3FCEF",
-                color: "#0B6E4F",
-                borderRadius: "6px",
-                fontWeight: "600",
+                fontSize: "1.5rem",
+                fontWeight: "700",
+                color: "#172B4D",
+                marginBottom: "1rem",
+                borderBottom: "2px solid #EBECF0",
+                paddingBottom: "0.5rem",
               }}
             >
-              {experimentMessage}
+              Analysis Results
+            </h2>
+
+            <h3
+              style={{
+                fontSize: "1.125rem",
+                fontWeight: "600",
+                color: "#172B4D",
+                marginBottom: "0.75rem",
+              }}
+            >
+              Top 3 Recommended Ideas:
+            </h3>
+
+            {analysisResult.topIdeas.map((idea, index) => (
+              <IdeaCard key={idea.id} idea={idea} index={index} />
+            ))}
+
+            <h3
+              style={{
+                fontSize: "1.125rem",
+                fontWeight: "600",
+                color: "#172B4D",
+                marginTop: "2rem",
+                marginBottom: "0.5rem",
+              }}
+            >
+              Other Ideas Analyzed
+            </h3>
+
+            <div
+              style={{
+                backgroundColor: "#FFF4F4", // light red tint
+                borderRadius: "8px",
+                padding: "0 1.5rem",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
+              }}
+            >
+              {analysisResult.otherIdeas.map((idea, index) => (
+                <OtherIdeaSummary key={index} idea={idea} />
+              ))}
             </div>
-          )}
-        </div>
+
+            <button
+              onClick={createExperiment}
+              style={{
+                marginTop: "1.5rem",
+                backgroundColor: "#4C9AFF", // Atlassian light blue
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                padding: "0.75rem 1.5rem",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "background-color 0.2s",
+              }}
+            >
+              Create Experiments & Jira Ticket
+            </button>
+
+            {experimentMessage && (
+              <div
+                style={{
+                  marginTop: "0.75rem",
+                  padding: "0.75rem 1rem",
+                  backgroundColor: "#E3FCEF",
+                  color: "#0B6E4F",
+                  borderRadius: "6px",
+                  fontWeight: "600",
+                }}
+              >
+                {experimentMessage}
+              </div>
+            )}
+
+            {/* Render the new, nicer Jira Ticket */}
+            {showJiraTicket && jiraTicketData && (
+              <JiraTicketCard ideaData={jiraTicketData} />
+            )}
+          </div>
+        </>
       )}
     </div>
   );
